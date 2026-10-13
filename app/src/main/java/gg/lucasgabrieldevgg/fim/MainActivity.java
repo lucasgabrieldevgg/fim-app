@@ -33,14 +33,17 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.net.URLEncoder;
+import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
@@ -51,9 +54,12 @@ public class MainActivity extends AppCompatActivity implements Bus.Listener {
     private static final String SITE = "https://fim-flax.vercel.app";
     private static final String COMO_FUNCIONA = SITE + "/#/como-funciona";
     private static final String CODIGO_RX = "[A-Za-z0-9_-]{4,64}";
+    /** Mesmo alfabeto do gerador do site (sem caracteres ambíguos i/l/o/0/1). */
+    private static final String ALFABETO = "abcdefghjkmnpqrstuvwxyz23456789";
 
     private Store store;
     private final OkHttpClient http = new OkHttpClient();
+    private String codigoGerado;
 
     private View telaSetup;
     private View telaPrincipal;
@@ -89,17 +95,71 @@ public class MainActivity extends AppCompatActivity implements Bus.Listener {
         lista.setAdapter(adapter);
 
         findViewById(R.id.btn_comecar).setOnClickListener(v -> comecar());
+        findViewById(R.id.btn_criar).setOnClickListener(v -> criarCodigo());
+        findViewById(R.id.btn_copiar_gerado).setOnClickListener(v ->
+                copiar(codigoGerado));
+        TextView instrucoes = findViewById(R.id.txt_instrucoes);
+        instrucoes.setPaintFlags(instrucoes.getPaintFlags() | android.graphics.Paint.UNDERLINE_TEXT_FLAG);
+        instrucoes.setOnClickListener(v -> {
+            if (codigoGerado != null) abrirUrl(SITE + "/#/agente/" + codigoGerado);
+        });
         findViewById(R.id.btn_bateria).setOnClickListener(v ->
                 startActivity(new Intent(android.provider.Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)));
         findViewById(R.id.txt_como_pegar).setOnClickListener(v ->
                 abrirUrl(COMO_FUNCIONA));
         TextView comoPegar = findViewById(R.id.txt_como_pegar);
         comoPegar.setPaintFlags(comoPegar.getPaintFlags() | android.graphics.Paint.UNDERLINE_TEXT_FLAG);
-        txtCodigo.setOnClickListener(v -> {
-            ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-            cm.setPrimaryClip(ClipData.newPlainText("Código do Fim!", txtCodigo.getText()));
-            Toast.makeText(this, R.string.codigo_copiado, Toast.LENGTH_SHORT).show();
-        });
+        txtCodigo.setOnClickListener(v -> copiar(txtCodigo.getText() == null ? null : txtCodigo.getText().toString()));
+    }
+
+    private void copiar(String texto) {
+        if (texto == null || texto.isEmpty()) return;
+        ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        cm.setPrimaryClip(ClipData.newPlainText("Código do Fim!", texto));
+        Toast.makeText(this, R.string.codigo_copiado, Toast.LENGTH_SHORT).show();
+    }
+
+    /** Cria um código novo dentro do app: gera, registra no site (melhor esforço) e mostra. */
+    private void criarCodigo() {
+        final String c = gerarCodigo();
+        codigoGerado = c;
+        campoCodigo.setText(c);
+        campoLayout.setError(null);
+        ((TextView) findViewById(R.id.txt_gerado)).setText(c);
+        findViewById(R.id.box_gerado).setVisibility(View.VISIBLE);
+        Toast.makeText(this, R.string.codigo_criado_toast, Toast.LENGTH_SHORT).show();
+        registrar(c);
+    }
+
+    private String gerarCodigo() {
+        SecureRandom r = new SecureRandom();
+        StringBuilder sb = new StringBuilder("fim-");
+        for (int i = 0; i < 12; i++) {
+            sb.append(ALFABETO.charAt(r.nextInt(ALFABETO.length())));
+        }
+        return sb.toString();
+    }
+
+    /** Registra o código no painel (POST /api/codes). Se falhar, o código funciona do mesmo jeito. */
+    private void registrar(String c) {
+        try {
+            JSONObject jo = new JSONObject();
+            jo.put("code", c);
+            RequestBody rb = RequestBody.create(jo.toString(), MediaType.parse("application/json"));
+            http.newCall(new Request.Builder().url(SITE + "/api/codes").post(rb).build())
+                    .enqueue(new Callback() {
+                        @Override
+                        public void onFailure(@NonNull Call call, @NonNull java.io.IOException e) {
+                            // offline: o código ainda vale, o ntfy não depende do nosso banco
+                        }
+
+                        @Override
+                        public void onResponse(@NonNull Call call, @NonNull Response resp) {
+                            resp.close();
+                        }
+                    });
+        } catch (Exception ignored) {
+        }
     }
 
     @Override

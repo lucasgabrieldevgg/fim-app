@@ -12,7 +12,7 @@ apagada.
 
 1. Baixe o APK: **[GitHub Releases](https://github.com/lucasgabrieldevgg/fim-app/releases/latest)**.
 2. Instale (o Android pede permissão para instalar apps de fontes desconhecidas — normal fora da Play Store).
-3. Abra o Fim!, cole **o seu código** (aquele que está nas instruções que você deu ao agente) e toque em **Começar a escutar**.
+3. Abra o Fim! e toque em **Criar um código agora** — o app gera um código seguro na hora, com botão de copiar e link para as instruções do agente (ou cole um código que você já criou no site) — e toque em **Começar a escutar**.
 
 Pronto: cada aviso que a IA enviar aparece como push no seu celular, com o título e a mensagem que ela escolheu.
 
@@ -35,6 +35,7 @@ Pronto: cada aviso que a IA enviar aparece como push no seu celular, com o títu
 Feito para ser simples de propósito. Só o que a gente precisa:
 
 - ✅ Colar o código e escutar (WebSocket no ntfy.sh, reconexão automática com backoff)
+- ✅ Criar o código dentro do próprio app (gera, registra no painel, botão copiar)
 - ✅ Push como notificação do sistema, mesmo com app fechado (serviço em primeiro plano)
 - ✅ Histórico dos últimos 100 avisos no próprio app
 - ✅ Backfill: na primeira conexão, puxa o histórico do painel web

@@ -7,7 +7,15 @@
     <string name="setup_hint">Código do Fim!</string>
     <string name="setup_helper">Está nas instruções que você colou no agente (ex.: fim-x7k92mq8ab)</string>
     <string name="btn_comecar">Começar a escutar</string>
+    <string name="btn_criar">Criar um código agora</string>
     <string name="como_pegar">Como eu pego meu código?</string>
+
+    <!-- Caixa de código criado dentro do app -->
+    <string name="criado_titulo">Código criado</string>
+    <string name="criado_hint">Este código é a sua chave: copie, cole nas instruções do agente e ative a escuta.</string>
+    <string name="btn_copiar">Copiar</string>
+    <string name="link_instrucoes">Instruções pro agente</string>
+    <string name="codigo_criado_toast">Código criado! Guarde bem.</string>
 
     <!-- Aviso Play Protect (pedido do usuário: sempre explícito) -->
     <string name="pp_titulo">⚠️ Sobre o Play Protect</string>
