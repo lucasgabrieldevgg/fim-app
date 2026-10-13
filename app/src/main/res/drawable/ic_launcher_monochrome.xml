@@ -1,0 +1,13 @@
+<!-- Fim! fork: monochrome (themed) icon — exclamation glyph, replaces the ntfy terminal. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+  <path
+      android:pathData="M54,28 C50.7,28 48,30.7 48,34 L48,56 C48,59.3 50.7,62 54,62 C57.3,62 60,59.3 60,56 L60,34 C60,30.7 57.3,28 54,28 Z"
+      android:fillColor="#FFFFFFFF"/>
+  <path
+      android:pathData="M54,66.5 C49.6,66.5 46,70.1 46,74.5 C46,78.9 49.6,82.5 54,82.5 C58.4,82.5 62,78.9 62,74.5 C62,70.1 58.4,66.5 54,66.5 Z"
+      android:fillColor="#FFFFFFFF"/>
+</vector>

@@ -1,0 +1,39 @@
+apply plugin: 'com.android.application'
+
+android {
+    namespace 'gg.lucasgabrieldevgg.fim'
+    compileSdk 36
+
+    defaultConfig {
+        // Mesmo applicationId e assinatura do fork v1 (1.25.2-fim.1): instala por cima.
+        applicationId "gg.lucasgabrieldevgg.fim"
+        minSdk 26
+        targetSdk 36
+        versionCode 100
+        versionName "2.0.0"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    lint {
+        // Build na sandbox: lint vital não deve travar o release; código revisado à mão.
+        checkReleaseBuilds false
+        abortOnError false
+    }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'androidx.recyclerview:recyclerview:1.3.2'
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+}

@@ -1,0 +1,11 @@
+// Fim! Android — app próprio, enxuto (client do ntfy.sh). Estrutura espelha o build
+// que já funcionou na sandbox: AGP 9 via buildscript classpath + old DSL.
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:9.0.0'
+    }
+}

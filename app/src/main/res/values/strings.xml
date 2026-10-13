@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Fim!</string>
+
+    <!-- Tela de setup -->
+    <string name="setup_subtitulo">Quando a tarefa do seu agente de IA termina, o celular avisa.</string>
+    <string name="setup_hint">Código do Fim!</string>
+    <string name="setup_helper">Está nas instruções que você colou no agente (ex.: fim-x7k92mq8ab)</string>
+    <string name="btn_comecar">Começar a escutar</string>
+    <string name="como_pegar">Como eu pego meu código?</string>
+
+    <!-- Aviso Play Protect (pedido do usuário: sempre explícito) -->
+    <string name="pp_titulo">⚠️ Sobre o Play Protect</string>
+    <string name="pp_texto">Na instalação, o Google Play Protect pode avisar que o app é \"desconhecido\" ou \"nocivo\". É um falso positivo comum em apps instalados fora da Play Store: o Fim! não coleta nada — só escuta o seu código no ntfy.sh. Quer conferir? Peça pro seu agente de IA auditar o código aberto em github.com/lucasgabrieldevgg/fim-app e o APK antes de instalar.</string>
+
+    <!-- Dica de bateria -->
+    <string name="bateria_texto">Para ser avisado na hora, mesmo com a tela apagada, tire o Fim! da otimização de bateria.</string>
+    <string name="bateria_btn">Abrir configurações</string>
+
+    <!-- Tela principal -->
+    <string name="toolbar_title">Fim!</string>
+    <string name="status_ao_vivo">Ao vivo · escutando</string>
+    <string name="status_conectando">Conectando…</string>
+    <string name="status_sem_internet">Sem internet — reconecta sozinho</string>
+    <string name="status_reconectando">Reconectando…</string>
+    <string name="codigo_copiado">Código copiado</string>
+    <string name="vazio_titulo">Tudo quieto por aqui.</string>
+    <string name="vazio_texto">Quando seu agente terminar a tarefa, o aviso aparece aqui — e como notificação no celular.</string>
+    <string name="notif_status_texto">Código: %s</string>
+
+    <!-- Fluxos -->
+    <string name="erro_codigo">Código inválido: 4 a 64 caracteres (letras, números, - ou _)</string>
+    <string name="sem_permissao_notif">Sem permissão de notificações — os avisos vão aparecer só dentro do app.</string>
+    <string name="historico_limpo">Histórico limpo</string>
+
+    <!-- Menu -->
+    <string name="menu_limpar">Limpar histórico</string>
+    <string name="menu_trocar">Trocar de código</string>
+    <string name="menu_site">Site do Fim!</string>
+</resources>
