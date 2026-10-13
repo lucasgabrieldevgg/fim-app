@@ -9,8 +9,8 @@ android {
         applicationId "gg.lucasgabrieldevgg.fim"
         minSdk 26
         targetSdk 36
-        versionCode 101
-        versionName "2.1.0"
+        versionCode 102
+        versionName "2.1.1"
     }
 
     buildTypes {

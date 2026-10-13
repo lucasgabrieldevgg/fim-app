@@ -50,6 +50,8 @@ public class ListenService extends Service {
     private long backoffMs = 1000;
     private boolean parado = false;
     private boolean vivo = false;
+    /** Uma reconexão pendente por vez; removeCallbacks antes de agendar de novo. */
+    private final Runnable reconectar = this::conectar;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -74,14 +76,22 @@ public class ListenService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        code = new Store(this).getCode();
-        if (code == null || code.isEmpty()) {
+        String novo = new Store(this).getCode();
+        if (novo == null || novo.isEmpty()) {
             stopSelf();
             return START_NOT_STICKY;
         }
+        boolean trocou = code != null && !code.equals(novo);
+        code = novo;
         startForegroundStatus();
         parado = false;
         Bus.get().servicoAtivo = true;
+        if (trocou) {
+            // Troca de código: derruba a escuta antiga e recomeça limpo.
+            vivo = false;
+            derrubarSocket();
+            backoffMs = 1000;
+        }
         conectar();
         return START_STICKY;
     }
@@ -128,8 +138,7 @@ public class ListenService extends Service {
                 h.post(() -> {
                     if (parado || vivo) return;
                     backoffMs = 1000;
-                    Bus.get().status(Bus.Status.CONECTANDO);
-                    conectar();
+                    conectar(); // também cancela qualquer reconexão agendada/duplicada
                 });
             }
         };
@@ -151,10 +160,9 @@ public class ListenService extends Service {
 
     private synchronized void conectar() {
         if (parado || code == null) return;
-        if (ws != null) {
-            ws.cancel();
-            ws = null;
-        }
+        h.removeCallbacks(reconectar); // reconexão tratada aqui nunca pode "sobrar" agendada
+        if (vivo && ws != null) return; // já está de pé: NUNCA derruba conexão saudável (era o bug do vai-e-vem)
+        derrubarSocket();
         if (!temInternet()) {
             vivo = false;
             Bus.get().status(Bus.Status.SEM_INTERNET);
@@ -165,9 +173,29 @@ public class ListenService extends Service {
         ws = http.newWebSocket(req, listener);
     }
 
+    /** Cancela o socket atual ANTES de zerar a referência: assim os callbacks dele
+     * (onFailure etc.) caem na guarda de identidade e não confundem o socket novo. */
+    private void derrubarSocket() {
+        if (ws != null) {
+            WebSocket antigo = ws;
+            ws = null;
+            antigo.cancel();
+        }
+    }
+
     private final WebSocketListener listener = new WebSocketListener() {
+        /** Guarda de identidade: evento de socket antigo/cancelado não mexe no estado atual.
+         *  Era aqui que nascia o vai-e-vem "Ao vivo ↔ Reconectando": o ws.cancel() do
+         *  socket antigo disparava o onFailure dele, que agendava outra reconexão —
+         *  que derrubava o socket saudável de novo, em loop infinito. */
+        private boolean ehOAtual(WebSocket webSocket) {
+            return webSocket == ws;
+        }
+
         @Override
         public void onOpen(WebSocket webSocket, Response response) {
+            if (!ehOAtual(webSocket)) return;
+            h.removeCallbacks(reconectar); // conectou: nada pode ficar agendado
             vivo = true;
             backoffMs = 1000;
             Bus.get().status(Bus.Status.AO_VIVO);
@@ -175,6 +203,7 @@ public class ListenService extends Service {
 
         @Override
         public void onMessage(WebSocket webSocket, String text) {
+            if (!ehOAtual(webSocket)) return;
             try {
                 JSONObject o = new JSONObject(text);
                 if (!"message".equals(o.optString("event"))) return;
@@ -195,6 +224,7 @@ public class ListenService extends Service {
 
         @Override
         public void onFailure(WebSocket webSocket, Throwable t, Response response) {
+            if (!ehOAtual(webSocket)) return; // morte do socket antigo: ignora
             vivo = false;
             Bus.get().status(temInternet() ? Bus.Status.DESCONECTADO : Bus.Status.SEM_INTERNET);
             agendarReconexao();
@@ -202,7 +232,9 @@ public class ListenService extends Service {
 
         @Override
         public void onClosed(WebSocket webSocket, int code, String reason) {
+            if (!ehOAtual(webSocket)) return;
             vivo = false;
+            Bus.get().status(Bus.Status.DESCONECTADO);
             agendarReconexao();
         }
     };
@@ -210,7 +242,8 @@ public class ListenService extends Service {
     private void agendarReconexao() {
         if (parado) return;
         ws = null;
-        h.postDelayed(this::conectar, backoffMs);
+        h.removeCallbacks(reconectar); // no máximo UMA reconexão pendente — nunca duas brigando
+        h.postDelayed(reconectar, backoffMs);
         if (backoffMs < 60000) backoffMs = Math.min(backoffMs * 2, 60000);
     }
 
